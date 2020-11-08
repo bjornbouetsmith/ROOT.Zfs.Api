@@ -1,3 +1,5 @@
+using System;
+using Api.Core;
 using Api.Core.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,10 +13,11 @@ namespace Api
     {
         public Startup(IConfiguration configuration)
         {
+
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -27,9 +30,18 @@ namespace Api
             services.AddAuthentication("Basic")
                 .AddScheme<BasicAuthSchemeOptions, BasicAuthenticationHandler>("Basic", opt => opt.Realm = "API");
 
-            //// configure DI for application services
-            //services.AddScoped<IUserService, StaticUserService>();
-            services.AddScoped<IUserService, LinuxPAMUserService>();
+            services.AddResponseCompression();
+
+            if (Configuration.UseLinuxAuth())
+            {
+                services.AddScoped<IUserService, LinuxPAMUserService>();
+            }
+            else 
+            {
+                services.AddScoped<IUserService, StaticUserService>();
+            }
+
+            services.AddSingleton<IRemoteConnection>(service => new RemoteConnection(Configuration));
 
         }
 

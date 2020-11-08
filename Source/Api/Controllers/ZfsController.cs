@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Api.Core;
 using Api.Models;
 using Api.Models.Zfs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Zfs.Core;
-using ROOT.Zfs.Core.Info;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Api.Controllers
 {
@@ -19,15 +13,22 @@ namespace Api.Controllers
     [ApiController]
     public class ZfsController : ControllerBase
     {
+        private readonly IRemoteConnection _remote;
+
+        public ZfsController(IRemoteConnection remote)
+        {
+            _remote = remote;
+        }
+
         // GET: api/<ZfsController>
         [HttpGet]
         public Response<ZfsInfo> Get()
         {
-
-
-
             var versionCall = Zfs.ProcessCalls.GetVersion();
-
+            if (_remote.RemoteProcessCall != null)
+            {
+                versionCall = _remote.RemoteProcessCall | versionCall;
+            }
             var response = versionCall.LoadResponse();
             if (response.Success)
             {
@@ -37,26 +38,6 @@ namespace Api.Controllers
 
             return new Response<ZfsInfo> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
 
-        }
-       
-
-
-        // POST api/<ZfsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<ZfsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<ZfsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }
