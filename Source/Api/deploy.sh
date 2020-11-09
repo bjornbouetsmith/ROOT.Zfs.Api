@@ -21,7 +21,7 @@ function start()
 
 function service_exists()
 {
-  if [ systemctl status|grep 'zfs-api.service' ]
+  if [[ $(systemctl status|grep 'zfs-api.service') ]]
   then
     return 1
   else
