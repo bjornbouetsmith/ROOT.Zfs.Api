@@ -7,6 +7,7 @@ function install_service()
 {
   ln -s /mnt/zfsapi/zfsapi/current/zfs-api.service /etc/systemd/system/zfs-api.service
   systemctl enable zfs-api
+  
 }
 
 function stop()
@@ -68,11 +69,17 @@ case $2 in
     echo "Checking and installing zfs-api"
     service_exists
     exists=$?
-    if [ $exists -eq 0 ]
+    if [ $exists -eq 1 ]
+    then
+      stop
+    fi
+    make_symlinks
+    
+    if [ $exists -eq 1 ]
     then
       install_service
     fi
-    stop
+    systemctl daemon-reload   
     start
     ;;
 esac
