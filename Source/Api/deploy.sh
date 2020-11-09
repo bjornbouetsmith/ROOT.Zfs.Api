@@ -1,7 +1,6 @@
-﻿#!/bin/sh
+#!/bin/sh
 
 version=$1
-
 
 function install_service()
 {
