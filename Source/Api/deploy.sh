@@ -5,9 +5,9 @@ version=$1
 
 function install_service()
 {
-  ln -s /mnt/zfsapi/zfsapi/current/zfs-api.service /etc/systemd/system/zfs-api.service
-  systemctl enable zfs-api
-  
+  ln -f -s /mnt/zfsapi/zfsapi/current/zfs-api.service /etc/systemd/system/zfs-api.service
+  systemctl daemon-reload
+  systemctl enable zfs-api.service
 }
 
 function stop()
@@ -74,14 +74,12 @@ case $2 in
       stop
     fi
     make_symlinks
-    
+
     if [ $exists -eq 1 ]
     then
       install_service
     fi
-    systemctl daemon-reload   
+    systemctl daemon-reload
     start
     ;;
 esac
-
-
