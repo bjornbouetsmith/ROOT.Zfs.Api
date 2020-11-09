@@ -35,6 +35,7 @@ namespace Api.Controllers
             if (dataset == null)
             {
                 Response.StatusCode = 404;
+                return null;
             }
 
             return new Response<DataSet> { Data = dataset };

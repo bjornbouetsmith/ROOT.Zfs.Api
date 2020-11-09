@@ -1,0 +1,16 @@
+﻿[Unit]
+Description=zfs-api
+After=network-online.target
+ConditionPathExists=/mnt/zfsapi/zfsapi/current/Api.dll
+
+[Service]
+WorkingDirectory=/mnt/zfsapi/zfsapi/current
+ExecStart=/usr/bin/dotnet /mnt/zfsapi/zfsapi/current/Api.dll
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=10 20 SIGABRT
+Type=exec
+
+[Install]
+WantedBy=multi-user.target
+Alias=zfs-api

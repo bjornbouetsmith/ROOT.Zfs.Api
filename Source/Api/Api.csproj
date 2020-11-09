@@ -7,8 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="deploy.sh" />
+    <None Remove="zfs-api.service" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="deploy.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="zfs-api.service">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Npam" Version="1.0.1" />
-    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.10" />
+    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.11" />
   </ItemGroup>
 
 

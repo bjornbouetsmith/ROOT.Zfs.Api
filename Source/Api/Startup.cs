@@ -53,8 +53,8 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
 
+           
             app.UseHttpsRedirection();
-
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -63,6 +63,7 @@ namespace Api
             {
                 endpoints.MapControllers();
             });
+            
         }
     }
 }
