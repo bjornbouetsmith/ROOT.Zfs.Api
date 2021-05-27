@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Npam" Version="1.0.1" />
-    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.11" />
+    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.15" />
   </ItemGroup>
 
 

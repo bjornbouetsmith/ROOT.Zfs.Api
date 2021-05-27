@@ -23,10 +23,7 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
-            //// configure basic authentication 
-            //services.AddAuthentication("Basic")
-            //    .AddScheme<BasicAuthSchemeOptions, BasicAuthenticationHandler>("Basic", opt => opt.Realm = "API");
+            
             services.AddAuthentication("Basic")
                 .AddScheme<BasicAuthSchemeOptions, BasicAuthenticationHandler>("Basic", opt => opt.Realm = "API");
 
