@@ -26,12 +26,12 @@ namespace Api.Controllers
             var dataSets = Zfs.GetDataSets(_remoteConnection.RemoteProcessCall);
             return new Response<IEnumerable<DataSet>> { Data = dataSets };
         }
-        
+
 
         [HttpGet("/api/zfs/datasets/{name}")]
         public Response<DataSet> GetDataSet(string name)
         {
-            var dataset = Zfs.GetDataSets(_remoteConnection.RemoteProcessCall).FirstOrDefault(ds=>ds.Name.Equals(name,System.StringComparison.OrdinalIgnoreCase));
+            var dataset = Zfs.GetDataSets(_remoteConnection.RemoteProcessCall).FirstOrDefault(ds => ds.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
             if (dataset == null)
             {
                 Response.StatusCode = 404;
