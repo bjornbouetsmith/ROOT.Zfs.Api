@@ -16,7 +16,7 @@ namespace Api.Core.Authentication
         {
             _logger = logger;
         }
-        private const string PamService = "password-auth";
+        private static string PamService = "password-auth"; // Might be just "password" on non redhat based - so should probably make this based on OS type
 
         public Task<User> AuthenticateAsync(string username, string password)
         {
