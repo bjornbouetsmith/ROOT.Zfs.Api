@@ -23,15 +23,22 @@ namespace Api.Controllers
         [HttpGet]
         public Response<IEnumerable<DataSet>> GetDataSets()
         {
-            var dataSets = Zfs.GetDataSets(_remoteConnection.RemoteProcessCall);
+            var dataSets = Zfs.DataSets.GetDataSets(_remoteConnection.RemoteProcessCall);
             return new Response<IEnumerable<DataSet>> { Data = dataSets };
         }
 
+        [HttpDelete("/api/zfs/datasets/{name}")]
+        public Response DeleteDataSet(string name)
+        {
+            Zfs.DataSets.DeleteDataSet(name, _remoteConnection.RemoteProcessCall);
+
+            return new Response();
+        }
 
         [HttpGet("/api/zfs/datasets/{name}")]
         public Response<DataSet> GetDataSet(string name)
         {
-            var dataset = Zfs.GetDataSets(_remoteConnection.RemoteProcessCall).FirstOrDefault(ds => ds.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
+            var dataset = Zfs.DataSets.GetDataSet(name, _remoteConnection.RemoteProcessCall);
             if (dataset == null)
             {
                 Response.StatusCode = 404;
