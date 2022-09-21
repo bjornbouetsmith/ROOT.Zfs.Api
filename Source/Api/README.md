@@ -12,6 +12,14 @@ Dotnet needs to be installed
 sudo dnf install aspnetcore-runtime-3.1
 ~~~
 
+Potentially you have to make a symlink to correct libpam, see:
+https://github.com/CamW/npam/issues/5
+
+~~~sh
+cd /lib64/
+sudo ln -s libpam.so.0 ./libpam.so
+~~~
+
 or whatever runtime version you want to run
 
 if deploy.sh is to be run via a build pipeline using ssh, then sudo needs to be set up for passwordless.
