@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Api.Core;
 using Api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -21,31 +22,31 @@ namespace Api.Controllers
         }
 
         [HttpGet("/api/zfs/datasets/{dataset}/properties")]
-        public Response<IEnumerable<PropertyValue>> GetProperties(string dataset)
+        public Response<PropertyData[]> GetProperties(string dataset)
         {
             var props = Zfs.Properties.GetProperties(dataset, _remote.RemoteProcessCall);
-            return new Response<IEnumerable<PropertyValue>> { Data = props };
+            return new Response<PropertyData[]> { Data = props.Select(PropertyData.FromValue).ToArray() };
         }
 
         [HttpGet("/api/zfs/datasets/{dataset}/properties/{property}")]
-        public Response<PropertyValue> GetProperty(string dataset, string property)
+        public Response<PropertyData> GetProperty(string dataset, string property)
         {
             var value = Zfs.Properties.GetProperty(dataset, property, _remote.RemoteProcessCall);
-            return new Response<PropertyValue> { Data = value };
+            return new Response<PropertyData> { Data = PropertyData.FromValue(value) };
         }
 
         [HttpPut("/api/zfs/datasets/{dataset}/properties/{property}")]
-        public Response<PropertyValue> SetProperty(string dataset, string property, [FromBody] string value)
+        public Response<PropertyData> SetProperty(string dataset, string property, [FromBody] string value)
         {
             try
             {
                 var newValue = Zfs.Properties.SetProperty(dataset, property, value, _remote.RemoteProcessCall);
                 //Zfs.
-                return new Response<PropertyValue> { Data = newValue };
+                return new Response<PropertyData> { Data = PropertyData.FromValue(newValue) };
             }
             catch (Exception e)
             {
-                return new Response<PropertyValue> { ErrorText = e.ToString(), Status = ResponseStatus.Failure };
+                return new Response<PropertyData> { ErrorText = e.ToString(), Status = ResponseStatus.Failure };
             }
         }
 
