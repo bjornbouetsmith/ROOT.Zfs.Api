@@ -23,7 +23,7 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{dataset}/properties")]
         public Response<IEnumerable<PropertyValue>> GetProperties(string dataset)
         {
-            var props = Zfs.Properties.GetProperties(dataset,_remote.RemoteProcessCall);
+            var props = Zfs.Properties.GetProperties(dataset, _remote.RemoteProcessCall);
             return new Response<IEnumerable<PropertyValue>> { Data = props };
         }
 
@@ -46,6 +46,27 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 return new Response<PropertyValue> { ErrorText = e.ToString(), Status = ResponseStatus.Failure };
+            }
+        }
+
+        [HttpPost("/api/zfs/datasets/{dataset}/properties/")]
+        public Response<PropertyValue[]> SetProperties(string dataset, [FromBody] PropertyData[] properties)
+        {
+            try
+            {
+                List<PropertyValue> responses = new List<PropertyValue>();
+                foreach (var property in properties)
+                {
+                    var newValue = Zfs.Properties.SetProperty(dataset, property.Name, property.Value, _remote.RemoteProcessCall);
+                    responses.Add(newValue);
+                }
+
+                return new Response<PropertyValue[]> { Data = responses.ToArray() };
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return new Response<PropertyValue[]> { ErrorText = e.ToString(), Status = ResponseStatus.Failure };
             }
         }
     }

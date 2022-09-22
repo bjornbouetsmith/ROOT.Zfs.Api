@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Api.Core;
 using Api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +23,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("/api/zfs/datasets/{dataset}/snapshots")]
-        public Response<IEnumerable<Snapshot>> GetSnapshots(string dataset)
+        public Response<Snapshot[]> GetSnapshots(string dataset)
         {
             ProcessCall pc;
             if (_remote.RemoteProcessCall != null)
@@ -36,11 +38,34 @@ namespace Api.Controllers
             var response = pc.LoadResponse();
             if (response.Success)
             {
-                var snapshots = SnapshotParser.Parse(response.StdOut);
-                return new Response<IEnumerable<Snapshot>> { Data = snapshots, Status = ResponseStatus.Success };
+                var snapshots = SnapshotParser.Parse(response.StdOut).ToArray();
+                return new Response<Snapshot[]> { Data = snapshots, Status = ResponseStatus.Success };
             }
 
-            return new Response<IEnumerable<Snapshot>> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
+            return new Response<Snapshot[]> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
+        }
+        [HttpDelete("/api/zfs/datasets/{dataset}/snapshots/{snapshot}")]
+        public Response DeleteSnapshot(string dataset, string snapshot)
+        {
+            ProcessCall pc;
+            var atIndex = snapshot.IndexOf("@", StringComparison.InvariantCultureIgnoreCase);
+            var rawSnapshot = atIndex > -1 ? snapshot.Substring(atIndex + 1) : snapshot;
+            if (_remote.RemoteProcessCall != null)
+            {
+                pc = _remote.RemoteProcessCall | Snapshots.ProcessCalls.DestroySnapshot(dataset, rawSnapshot);
+            }
+            else
+            {
+                pc = Snapshots.ProcessCalls.DestroySnapshot(dataset, rawSnapshot);
+            }
+
+            var response = pc.LoadResponse();
+            if (response.Success)
+            {
+                return new Response { Status = ResponseStatus.Success };
+            }
+
+            return new Response<Snapshot[]> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
         }
     }
 }
