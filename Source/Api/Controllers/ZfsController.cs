@@ -1,13 +1,15 @@
-﻿using Api.Core;
+﻿using System.Linq;
+using Api.Core;
 using Api.Models;
 using Api.Models.Zfs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Zfs.Core;
+using ROOT.Zfs.Core.Info;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/zfs")]
     [Authorize]
     //[Route("[controller]")]
     [ApiController]
@@ -37,7 +39,24 @@ namespace Api.Controllers
 
 
             return new Response<ZfsInfo> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
+        }
 
+        [HttpGet("/api/zfs/data/datasets/properties")]
+        public Response<Property[]> GetAvailableDataSetProperties()
+        {
+            var properties = Zfs.Properties.GetAvailableDataSetProperties(_remote.RemoteProcessCall);
+
+
+            return new Response<Property[]> { Data = properties.ToArray() };
+        }
+        
+        [HttpGet("/api/zfs/data/pools/properties")]
+        public Response<Property[]> GetAvailablePoolProperties()
+        {
+            var properties = Zfs.Properties.GetAvailableDataSetProperties(_remote.RemoteProcessCall);
+
+
+            return new Response<Property[]> { Data = properties.ToArray() };
         }
     }
 }
