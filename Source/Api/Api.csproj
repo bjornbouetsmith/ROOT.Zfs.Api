@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Npam" Version="1.0.2" />
-    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.41" />
+    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.42" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
