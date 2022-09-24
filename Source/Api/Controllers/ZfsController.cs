@@ -22,7 +22,10 @@ namespace Api.Controllers
             _remote = remote;
         }
 
-        // GET: api/<ZfsController>
+        /// <summary>
+        /// Gets ZFS version info
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public Response<ZfsInfo> Get()
         {
@@ -40,8 +43,10 @@ namespace Api.Controllers
 
             return new Response<ZfsInfo> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
         }
-
-        [HttpGet("/api/zfs/data/datasets/properties")]
+        /// <summary>
+        /// Gets a list of properties that can be set on a dataset
+        /// </summary>
+        [HttpGet("/api/zfs/info/datasets/properties")]
         public Response<Property[]> GetAvailableDataSetProperties()
         {
             var properties = Zfs.Properties.GetAvailableDataSetProperties(_remote.RemoteProcessCall);
@@ -49,8 +54,12 @@ namespace Api.Controllers
 
             return new Response<Property[]> { Data = properties.ToArray() };
         }
-        
-        [HttpGet("/api/zfs/data/pools/properties")]
+
+        /// <summary>
+        /// Gets a list of properties that can be set on a pool
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("/api/zfs/info/pools/properties")]
         public Response<Property[]> GetAvailablePoolProperties()
         {
             var properties = Zfs.Properties.GetAvailableDataSetProperties(_remote.RemoteProcessCall);

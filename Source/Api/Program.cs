@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -41,6 +43,10 @@ namespace Api
                                 Title = "ZFS API",
                                 Version = "v1"
                             });
+
+                            // using System.Reflection;
+                            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
                         });
                     });
     }
