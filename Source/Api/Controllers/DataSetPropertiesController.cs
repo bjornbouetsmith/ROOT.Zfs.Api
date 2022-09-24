@@ -50,6 +50,22 @@ namespace Api.Controllers
             }
         }
 
+        [HttpDelete("/api/zfs/datasets/{dataset}/properties/{property}")]
+        public Response<PropertyData> ResetProperty(string dataset, string property)
+        {
+            try
+            {
+                Zfs.Properties.ResetPropertyToInherited(dataset, property, _remote.RemoteProcessCall);
+
+                var value = Zfs.Properties.GetProperty(dataset, property, _remote.RemoteProcessCall);
+                return new Response<PropertyData> { Data = PropertyData.FromValue(value) };
+            }
+            catch (Exception e)
+            {
+                return new Response<PropertyData> { ErrorText = e.ToString(), Status = ResponseStatus.Failure };
+            }
+        }
+
         [HttpPost("/api/zfs/datasets/{dataset}/properties/")]
         public Response<PropertyValue[]> SetProperties(string dataset, [FromBody] PropertyData[] properties)
         {
