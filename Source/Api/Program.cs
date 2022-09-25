@@ -9,7 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api
 {
@@ -47,7 +49,55 @@ namespace Api
                             // using System.Reflection;
                             var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                             c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+                            c.SchemaFilter<EnumSchemaFilter>();
+                            c.ParameterFilter<EnumParameterFilter>();
+                            //c.UseInlineDefinitionsForEnums();
                         });
                     });
+    }
+
+    public class EnumParameterFilter : IParameterFilter
+    {
+        public void Apply(OpenApiParameter parameter, ParameterFilterContext context)
+        {
+            if (parameter.In.HasValue 
+                && parameter.In.Value == ParameterLocation.Query
+                && context.ParameterInfo.ParameterType.IsEnum)
+            {
+                var type = context.ParameterInfo.ParameterType;
+                var enumerable = Enum.GetNames(type).Select(name => $"{Convert.ToInt64(Enum.Parse(type, name))} - {name}");
+                var stringVal = string.Join("<br/>", enumerable);
+                parameter.Description += "<br/><br/>Valid values:<br/>" + string.Join("<br/>", stringVal);
+                if (type.GetCustomAttribute<FlagsAttribute>() != null)
+                {
+                    parameter.Description += "<br/><br/>Flags enumeration, so combinations are also valid";
+                }
+            }
+        }
+    }
+
+    public class EnumSchemaFilter : ISchemaFilter
+    {
+        public void Apply(OpenApiSchema model, SchemaFilterContext context)
+        {
+            if (context.Type.IsEnum)
+            {
+                model.Enum.Clear();
+                var enumerable = Enum.GetNames(context.Type).Select(name => $"{Convert.ToInt64(Enum.Parse(context.Type, name))} - {name}");
+                var stringVal = string.Join("<br/>", enumerable);
+                model.Description += "Valid values:<br/>" + string.Join("<br/>", stringVal);
+                // Only make sense to add these values when its not a flags enum
+                if (context.Type.GetCustomAttribute<FlagsAttribute>() == null)
+                {
+                  
+                    var enumNames = Enum.GetNames(context.Type).ToList();
+                    enumNames.ForEach(name => model.Enum.Add(new OpenApiInteger(Convert.ToInt32(Enum.Parse(context.Type, name)))));
+                }
+                else
+                {
+                    model.Description += "<br/><br/>Flags enumeration, so combinations are also valid";
+                }
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using ROOT.Shared.Utils.OS;
 using ROOT.Zfs.Public;
 using ROOT.Zfs.Public.Data;
+using ROOT.Zfs.Public.Data.DataSets;
 
 namespace Api.Controllers
 {
@@ -20,7 +21,7 @@ namespace Api.Controllers
         public DataSetController(IZfsAccessor zfsAccessor)
         {
             _zfs = zfsAccessor.Zfs;
-            
+
         }
 
         /// <summary>
@@ -37,12 +38,16 @@ namespace Api.Controllers
         /// <summary>
         /// Deletes the given dataset
         /// </summary>
+        /// <param name="name">The dataset to delete</param>
+        /// <param name="flags">How to delete the dataset</param>
         [HttpDelete("/api/zfs/datasets/{name}")]
-        public Response DeleteDataSet(string name)
+        public Response<string> DeleteDataSet(string name, [FromQuery] DataSetDestroyFlags flags)
         {
-            _zfs.DataSets.DestroyDataSet(name);
+            var response = _zfs.DataSets.DestroyDataSet(name, flags);
 
-            return new Response();
+            var data = flags.HasFlag(DataSetDestroyFlags.DryRun) ? response.DryRun : null;
+
+            return new Response<string> { Data = data };
         }
 
         /// <summary>
@@ -78,7 +83,7 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{name}")]
         public Response<DataSet> GetDataSet(string name)
         {
-            var dataset =_zfs.DataSets.GetDataSet(name);
+            var dataset = _zfs.DataSets.GetDataSet(name);
 
             if (dataset == null)
             {

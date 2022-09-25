@@ -61,12 +61,12 @@ namespace Api
             {
                 endpoints.MapControllers();
             });
+            
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "ZFS API v1");
             });
-
         }
     }
 }
