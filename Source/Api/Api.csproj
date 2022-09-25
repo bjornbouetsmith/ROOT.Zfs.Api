@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>1b94c50a-02c2-443a-82b2-9e0443a56993</UserSecretsId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -31,7 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="Npam" Version="1.0.2" />
-    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.51" />
+    <PackageReference Include="ROOT.Zfs.Core" Version="0.9.63" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 

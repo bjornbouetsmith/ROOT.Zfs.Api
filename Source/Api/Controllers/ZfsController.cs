@@ -5,7 +5,8 @@ using Api.Models.Zfs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Zfs.Core;
-using ROOT.Zfs.Core.Info;
+using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Data;
 
 namespace Api.Controllers
 {
@@ -15,11 +16,11 @@ namespace Api.Controllers
     [ApiController]
     public class ZfsController : ControllerBase
     {
-        private readonly IRemoteConnection _remote;
+        private readonly IZfs _zfs;
 
-        public ZfsController(IRemoteConnection remote)
+        public ZfsController(IZfsAccessor zfsAccessor)
         {
-            _remote = remote;
+            _zfs = zfsAccessor.Zfs;
         }
 
         /// <summary>
@@ -29,29 +30,19 @@ namespace Api.Controllers
         [HttpGet]
         public Response<ZfsInfo> Get()
         {
-            var versionCall = Zfs.ProcessCalls.GetVersion();
-            if (_remote.RemoteProcessCall != null)
-            {
-                versionCall = _remote.RemoteProcessCall | versionCall;
-            }
-            var response = versionCall.LoadResponse();
-            if (response.Success)
-            {
-                return new Response<ZfsInfo> { Data = new ZfsInfo { Version = response.StdOut } };
-            }
+            var info = _zfs.GetVersionInfo();
 
-
-            return new Response<ZfsInfo> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
+            return new Response<ZfsInfo> { Data = new ZfsInfo { Version = info.Lines } };
         }
+
         /// <summary>
         /// Gets a list of properties that can be set on a dataset
         /// </summary>
         [HttpGet("/api/zfs/info/datasets/properties")]
         public Response<Property[]> GetAvailableDataSetProperties()
         {
-            var properties = Zfs.Properties.GetAvailableDataSetProperties(_remote.RemoteProcessCall);
-
-
+            var properties = _zfs.Properties.GetAvailableDataSetProperties();
+            
             return new Response<Property[]> { Data = properties.ToArray() };
         }
 
@@ -62,9 +53,8 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/info/pools/properties")]
         public Response<Property[]> GetAvailablePoolProperties()
         {
-            var properties = Zfs.Properties.GetAvailableDataSetProperties(_remote.RemoteProcessCall);
-
-
+            var properties = _zfs.Properties.GetAvailableDataSetProperties();
+            
             return new Response<Property[]> { Data = properties.ToArray() };
         }
     }

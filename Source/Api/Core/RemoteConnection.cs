@@ -1,8 +1,24 @@
 ﻿using Microsoft.Extensions.Configuration;
 using ROOT.Shared.Utils.OS;
+using ROOT.Zfs.Core;
+using ROOT.Zfs.Public;
 
 namespace Api.Core
 {
+    public interface IZfsAccessor
+    {
+        IZfs Zfs { get; }
+    }
+
+    public class ZfsAccessor : IZfsAccessor
+    {
+        public ZfsAccessor(IRemoteConnection remoteConnection)
+        {
+            Zfs = new Zfs(remoteConnection.RemoteProcessCall);
+        }
+
+        public IZfs Zfs { get; }
+    }
 
     public interface IRemoteConnection
     {

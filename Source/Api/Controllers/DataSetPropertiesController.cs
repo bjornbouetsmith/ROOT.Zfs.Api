@@ -5,8 +5,8 @@ using Api.Core;
 using Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ROOT.Zfs.Core;
-using ROOT.Zfs.Core.Info;
+using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Data;
 
 namespace Api.Controllers
 {
@@ -14,11 +14,11 @@ namespace Api.Controllers
     [ApiController]
     public class DataSetPropertiesController : ControllerBase
     {
-        private readonly IRemoteConnection _remote;
+        private readonly IZfs _zfs;
 
-        public DataSetPropertiesController(IRemoteConnection remote)
+        public DataSetPropertiesController(IZfsAccessor zfsAccessor)
         {
-            _remote = remote;
+            _zfs = zfsAccessor.Zfs;
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{dataset}/properties")]
         public Response<PropertyData[]> GetProperties(string dataset)
         {
-            var props = Zfs.Properties.GetProperties(dataset, _remote.RemoteProcessCall);
+            var props = _zfs.Properties.GetProperties(dataset);
             return new Response<PropertyData[]> { Data = props.Select(PropertyData.FromValue).ToArray() };
         }
 
@@ -41,7 +41,7 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{dataset}/properties/{property}")]
         public Response<PropertyData> GetProperty(string dataset, string property)
         {
-            var value = Zfs.Properties.GetProperty(dataset, property, _remote.RemoteProcessCall);
+            var value = _zfs.Properties.GetProperty(dataset, property);
             return new Response<PropertyData> { Data = PropertyData.FromValue(value) };
         }
 
@@ -56,7 +56,7 @@ namespace Api.Controllers
         {
             try
             {
-                var newValue = Zfs.Properties.SetProperty(dataset, property, value, _remote.RemoteProcessCall);
+                var newValue = _zfs.Properties.SetProperty(dataset, property, value);
                 //Zfs.
                 return new Response<PropertyData> { Data = PropertyData.FromValue(newValue) };
             }
@@ -77,9 +77,9 @@ namespace Api.Controllers
         {
             try
             {
-                Zfs.Properties.ResetPropertyToInherited(dataset, property, _remote.RemoteProcessCall);
+                _zfs.Properties.ResetPropertyToInherited(dataset, property);
 
-                var value = Zfs.Properties.GetProperty(dataset, property, _remote.RemoteProcessCall);
+                var value = _zfs.Properties.GetProperty(dataset, property);
                 return new Response<PropertyData> { Data = PropertyData.FromValue(value) };
             }
             catch (Exception e)
@@ -109,7 +109,7 @@ namespace Api.Controllers
                 List<PropertyValue> responses = new List<PropertyValue>();
                 foreach (var property in properties)
                 {
-                    var newValue = Zfs.Properties.SetProperty(dataset, property.Name, property.Value, _remote.RemoteProcessCall);
+                    var newValue = _zfs.Properties.SetProperty(dataset, property.Name, property.Value);
                     responses.Add(newValue);
                 }
 

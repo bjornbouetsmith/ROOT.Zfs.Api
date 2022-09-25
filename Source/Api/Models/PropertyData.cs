@@ -1,4 +1,4 @@
-﻿using ROOT.Zfs.Core.Info;
+﻿using ROOT.Zfs.Public.Data;
 
 namespace Api.Models
 {

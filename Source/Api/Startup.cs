@@ -39,6 +39,7 @@ namespace Api
             }
 
             services.AddSingleton<IRemoteConnection>(service => new RemoteConnection(Configuration));
+            services.AddScoped<IZfsAccessor, ZfsAccessor>();
 
         }
 

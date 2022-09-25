@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Api.Core;
 using Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Shared.Utils.OS;
-using ROOT.Zfs.Core;
-using ROOT.Zfs.Core.Info;
+using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Data;
 
 namespace Api.Controllers
 {
@@ -16,11 +15,12 @@ namespace Api.Controllers
     [ApiController]
     public class DataSetController : ControllerBase
     {
-        private readonly IRemoteConnection _remoteConnection;
+        private readonly IZfs _zfs;
 
-        public DataSetController(IRemoteConnection remoteConnection)
+        public DataSetController(IZfsAccessor zfsAccessor)
         {
-            _remoteConnection = remoteConnection;
+            _zfs = zfsAccessor.Zfs;
+            
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Api.Controllers
         [HttpGet]
         public Response<IEnumerable<DataSet>> GetDataSets()
         {
-            var dataSets = Zfs.DataSets.GetDataSets(_remoteConnection.RemoteProcessCall);
+            var dataSets = _zfs.DataSets.GetDataSets();
             return new Response<IEnumerable<DataSet>> { Data = dataSets };
         }
 
@@ -40,7 +40,7 @@ namespace Api.Controllers
         [HttpDelete("/api/zfs/datasets/{name}")]
         public Response DeleteDataSet(string name)
         {
-            Zfs.DataSets.DeleteDataSet(name, _remoteConnection.RemoteProcessCall);
+            _zfs.DataSets.DestroyDataSet(name);
 
             return new Response();
         }
@@ -59,7 +59,7 @@ namespace Api.Controllers
             var propertyValues = properties.Select(p => new PropertyValue(p.Name, p.Source, p.Value)).ToArray();
             try
             {
-                var dataset = Zfs.DataSets.CreateDataSet(name, propertyValues, _remoteConnection.RemoteProcessCall);
+                var dataset = _zfs.DataSets.CreateDataSet(name, propertyValues);
 
                 return new Response<DataSet> { Data = dataset };
             }
@@ -78,7 +78,8 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{name}")]
         public Response<DataSet> GetDataSet(string name)
         {
-            var dataset = Zfs.DataSets.GetDataSet(name, _remoteConnection.RemoteProcessCall);
+            var dataset =_zfs.DataSets.GetDataSet(name);
+
             if (dataset == null)
             {
                 Response.StatusCode = 404;

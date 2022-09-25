@@ -5,8 +5,8 @@ using Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Shared.Utils.OS;
-using ROOT.Zfs.Core.Commands;
-using ROOT.Zfs.Core.Info;
+using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Data;
 
 namespace Api.Controllers
 {
@@ -14,11 +14,11 @@ namespace Api.Controllers
     [ApiController]
     public class SnapshotController : ControllerBase
     {
-        private readonly IRemoteConnection _remote;
+        private readonly IZfs _zfs;
 
-        public SnapshotController(IRemoteConnection remote)
+        public SnapshotController(IZfsAccessor zfsAccessor)
         {
-            _remote = remote;
+            _zfs = zfsAccessor.Zfs;
         }
 
         /// <summary>
@@ -28,24 +28,9 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{dataset}/snapshots")]
         public Response<Snapshot[]> GetSnapshots(string dataset)
         {
-            ProcessCall pc;
-            if (_remote.RemoteProcessCall != null)
-            {
-                pc = _remote.RemoteProcessCall | Snapshots.ProcessCalls.ListSnapshots(dataset);
-            }
-            else
-            {
-                pc = Snapshots.ProcessCalls.ListSnapshots(dataset);
-            }
+            var snapshots = _zfs.Snapshots.GetSnapshots(dataset);
 
-            var response = pc.LoadResponse();
-            if (response.Success)
-            {
-                var snapshots = SnapshotParser.Parse(response.StdOut).ToArray();
-                return new Response<Snapshot[]> { Data = snapshots, Status = ResponseStatus.Success };
-            }
-
-            return new Response<Snapshot[]> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
+            return new Response<Snapshot[]> { Data = snapshots.ToArray() };
         }
 
         /// <summary>
@@ -53,28 +38,14 @@ namespace Api.Controllers
         /// </summary>
         /// <param name="dataset">The dataset where the snapshot resides</param>
         /// <param name="snapshot">The snapshot to delete</param>
+        /// <param name="isExactName">Whether or not the snapshot name is to be used for exact match, or as a prefix.
+        /// Optional to pass this, defaults to true, which means exact match on snapshot name</param>
         [HttpDelete("/api/zfs/datasets/{dataset}/snapshots/{snapshot}")]
-        public Response DeleteSnapshot(string dataset, string snapshot)
+        public Response DeleteSnapshot(string dataset, string snapshot, [FromQuery]bool isExactName = true)
         {
-            ProcessCall pc;
-            var atIndex = snapshot.IndexOf("@", StringComparison.InvariantCultureIgnoreCase);
-            var rawSnapshot = atIndex > -1 ? snapshot.Substring(atIndex + 1) : snapshot;
-            if (_remote.RemoteProcessCall != null)
-            {
-                pc = _remote.RemoteProcessCall | Snapshots.ProcessCalls.DestroySnapshot(dataset, rawSnapshot);
-            }
-            else
-            {
-                pc = Snapshots.ProcessCalls.DestroySnapshot(dataset, rawSnapshot);
-            }
+            _zfs.Snapshots.DestroySnapshot(dataset, snapshot, isExactName);
 
-            var response = pc.LoadResponse();
-            if (response.Success)
-            {
-                return new Response { Status = ResponseStatus.Success };
-            }
-
-            return new Response<Snapshot[]> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
+            return new Response();
         }
 
         /// <summary>
@@ -85,27 +56,13 @@ namespace Api.Controllers
         [HttpPost("/api/zfs/datasets/{dataset}/snapshots")]
         public Response CreateSnapshot(string dataset, [FromBody] string snapshot)
         {
-            ProcessCall pc;
-
             // Trim values before @ if there, so we only pass on the raw name to zfs
             var atIndex = snapshot.IndexOf("@", StringComparison.InvariantCultureIgnoreCase);
             var rawSnapshot = atIndex > -1 ? snapshot.Substring(atIndex + 1) : snapshot;
-            if (_remote.RemoteProcessCall != null)
-            {
-                pc = _remote.RemoteProcessCall | Snapshots.ProcessCalls.CreateSnapshot(dataset, rawSnapshot);
-            }
-            else
-            {
-                pc = Snapshots.ProcessCalls.CreateSnapshot(dataset, rawSnapshot);
-            }
 
-            var response = pc.LoadResponse();
-            if (response.Success)
-            {
-                return new Response { Status = ResponseStatus.Success };
-            }
+            _zfs.Snapshots.CreateSnapshot(dataset, rawSnapshot);
 
-            return new Response<Snapshot[]> { Status = ResponseStatus.Failure, ErrorText = response.StdError };
+            return new Response();
         }
     }
 }
