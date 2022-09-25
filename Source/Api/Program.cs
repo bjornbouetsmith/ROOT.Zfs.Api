@@ -67,6 +67,7 @@ namespace Api
                 var type = context.ParameterInfo.ParameterType;
                 var enumerable = Enum.GetNames(type).Select(name => $"{Convert.ToInt64(Enum.Parse(type, name))} - {name}");
                 var stringVal = string.Join("<br/>", enumerable);
+                parameter.Description += $"<br/><br/>Enumeration - see type:{type.Name}";
                 parameter.Description += "<br/><br/>Valid values:<br/>" + string.Join("<br/>", stringVal);
                 if (type.GetCustomAttribute<FlagsAttribute>() != null)
                 {
