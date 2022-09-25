@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Api.Core;
 using Api.Models;
@@ -41,13 +42,13 @@ namespace Api.Controllers
         /// <param name="name">The dataset to delete</param>
         /// <param name="flags">How to delete the dataset</param>
         [HttpDelete("/api/zfs/datasets/{name}")]
-        public Response<string> DeleteDataSet(string name, [FromQuery] DataSetDestroyFlags flags)
+        public Response<string[]> DeleteDataSet(string name, [FromQuery] DataSetDestroyFlags flags)
         {
             var response = _zfs.DataSets.DestroyDataSet(name, flags);
 
             var data = flags.HasFlag(DataSetDestroyFlags.DryRun) ? response.DryRun : null;
 
-            return new Response<string> { Data = data };
+            return new Response<string[]> { Data = data?.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) };
         }
 
         /// <summary>
