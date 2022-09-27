@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,9 +24,10 @@ namespace Api
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-                Host.CreateDefaultBuilder(args)
-                    
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var builder = Host.CreateDefaultBuilder(args)
+
                 .ConfigureLogging(conf =>
                 {
                     conf.AddDebug();
@@ -34,33 +37,47 @@ namespace Api
                 {
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseUrls("http://*:5000");
-                    
+
                 })
                 .ConfigureServices(s =>
-                    {
-                        s.AddSwaggerGen(c =>
-                        {
-                            c.SwaggerDoc("v1", new OpenApiInfo
-                            {
-                                Title = "ZFS API",
-                                Version = "v1"
-                            });
+                {
+                    //s.AddMvc(o => o.RespectBrowserAcceptHeader = true)
+                    //    //.AddXmlSerializerFormatters();
+                    //    .AddXmlDataContractSerializerFormatters();
 
-                            // using System.Reflection;
-                            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-                            c.SchemaFilter<EnumSchemaFilter>();
-                            c.ParameterFilter<EnumParameterFilter>();
-                            //c.UseInlineDefinitionsForEnums();
+                    
+                    s.AddSwaggerGen(c =>
+                    {
+                        c.SwaggerDoc("v1", new OpenApiInfo
+                        {
+                            Title = "ZFS API",
+                            Version = "v1"
                         });
+
+                        // using System.Reflection;
+                        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+                        c.SchemaFilter<EnumSchemaFilter>();
+                        c.ParameterFilter<EnumParameterFilter>();
+                        //c.UseInlineDefinitionsForEnums();
                     });
+                    s.AddControllers();
+                    //s.AddControllers(options =>
+                    //{
+                    //    options.Filters.Add(new ProducesAttribute("application/json", "application/xml", "text/xml", "text/json"));
+                    //    //options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+                    //});
+                });
+
+            return builder;
+        }
     }
 
     public class EnumParameterFilter : IParameterFilter
     {
         public void Apply(OpenApiParameter parameter, ParameterFilterContext context)
         {
-            if (parameter.In.HasValue 
+            if (parameter.In.HasValue
                 && parameter.In.Value == ParameterLocation.Query
                 && context.ParameterInfo.ParameterType.IsEnum)
             {
@@ -90,7 +107,7 @@ namespace Api
                 // Only make sense to add these values when its not a flags enum
                 if (context.Type.GetCustomAttribute<FlagsAttribute>() == null)
                 {
-                  
+
                     var enumNames = Enum.GetNames(context.Type).ToList();
                     enumNames.ForEach(name => model.Enum.Add(new OpenApiInteger(Convert.ToInt32(Enum.Parse(context.Type, name)))));
                 }
