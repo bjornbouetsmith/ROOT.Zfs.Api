@@ -14,7 +14,7 @@ namespace Api.Core
     {
         public ZfsAccessor(IRemoteConnection remoteConnection)
         {
-            Zfs = new Zfs(remoteConnection.RemoteProcessCall);
+            Zfs = new Zfs(remoteConnection.SSHConnection);
         }
 
         public IZfs Zfs { get; }
@@ -22,7 +22,7 @@ namespace Api.Core
 
     public interface IRemoteConnection
     {
-        RemoteProcessCall RemoteProcessCall { get; }
+        SSHProcessCall SSHConnection { get; }
     }
 
     public class RemoteConnection : IRemoteConnection
@@ -32,12 +32,12 @@ namespace Api.Core
             var remoteConfig = config.GetSection("Remote").Get<RemoteHostConfiguration>();
             if (remoteConfig.UseRemoteConnection)
             {
-                RemoteProcessCall = new RemoteProcessCall(remoteConfig.UserName, remoteConfig.HostName, remoteConfig.UseSudo);
+                SSHConnection = new SSHProcessCall(remoteConfig.UserName, remoteConfig.HostName, remoteConfig.UseSudo);
             }
         }
 
 
-        public RemoteProcessCall RemoteProcessCall { get; }
+        public SSHProcessCall SSHConnection { get; }
     }
 
     public class RemoteHostConfiguration

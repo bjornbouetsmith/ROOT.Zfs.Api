@@ -62,11 +62,11 @@ namespace Api
                         //c.UseInlineDefinitionsForEnums();
                     });
                     s.AddControllers();
-                    //s.AddControllers(options =>
-                    //{
-                    //    options.Filters.Add(new ProducesAttribute("application/json", "application/xml", "text/xml", "text/json"));
-                    //    //options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
-                    //});
+                    s.AddControllers(options =>
+                    {
+                        options.Filters.Add(new ProducesAttribute("application/json", "text/json"));//"application/xml", "text/xml",
+                        //options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+                    });
                 });
 
             return builder;
