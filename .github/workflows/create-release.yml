@@ -48,8 +48,9 @@ jobs:
       with:
         file: Source/Api/Api.csproj
         version: ${{ inputs.version }}
-      env:
-        release_version: ${{ inputs.version }}
+      run: |
+        "echo release_version=${{ inputs.version }}" >> $GITHUB_ENV
+
     - name: Update version auto
       id: update_version_auto
       if: ${{ inputs.version == '' }}
@@ -57,8 +58,8 @@ jobs:
       with:
         file: Source/Api/Api.csproj
         version: build
-      env:
-        release_version: ${{ steps.update_version.outputs.newVersion }}
+      run: |
+        "echo release_version=${{ steps.update_version.outputs.newVersion }}" >> $GITHUB_ENV
     - name: Build
       run: dotnet build Source/ROOT.Zfs.Api.sln --no-restore --configuration Release
 #    - name: Test
