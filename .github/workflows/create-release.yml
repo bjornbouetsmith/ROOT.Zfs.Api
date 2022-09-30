@@ -16,7 +16,7 @@ on:
         default: true
         required: true
       version:
-        type: boolean  
+        type: string  
         description: 'Override version (x.y.z)'
         required: false
 
