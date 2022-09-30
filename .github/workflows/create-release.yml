@@ -47,7 +47,7 @@ jobs:
 #    - name: Test
 #      run: dotnet test Source/**/*.Tests.csproj --no-build --verbosity normal --configuration Release --filter "TestCategory!=Integration"
     - name: Publish
-      run: dotnet publish --configuration Release --framework net6.0 --output ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}
+      run: dotnet publish Source/ROOT.Zfs.Api.sln --configuration Release --framework net6.0 --output ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}
     - name: ZIP published api
       run: zip -r -q ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}.zip ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}/
     - name: Upload zip file
