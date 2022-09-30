@@ -34,6 +34,6 @@ An example deployment script that can be used remotely is:
 
 echo "deploying version:$(Build.BuildNumber)"
 cd /mnt/zfsapi/zfsapi
-tr -d '\r' < /mnt/zfsapi/zfsapi/$(Build.BuildNumber)/deploy.sh > /mnt/zfsapi/zfsapi/deploy.sh
+tr -d '\r' < /mnt/zfsapi/zfsapi/1.2.3/deploy.sh > /mnt/zfsapi/zfsapi/deploy.sh
 
-sudo sh /mnt/zfsapi/zfsapi/deploy.sh $(Build.BuildNumber) all
+sudo sh /mnt/zfsapi/zfsapi/deploy.sh 1.2.3 all

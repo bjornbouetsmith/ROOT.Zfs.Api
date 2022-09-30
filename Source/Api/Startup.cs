@@ -1,4 +1,3 @@
-using System;
 using Api.Core;
 using Api.Core.Authentication;
 using Microsoft.AspNetCore.Builder;
