@@ -44,8 +44,8 @@ jobs:
         version: bump-build
     - name: Build
       run: dotnet build Source/ROOT.Zfs.Api.sln --no-restore --configuration Release
-    - name: Test
-      run: dotnet test Source/**/*.Tests.csproj --no-build --verbosity normal --configuration Release --filter "TestCategory!=Integration"
+#    - name: Test
+#      run: dotnet test Source/**/*.Tests.csproj --no-build --verbosity normal --configuration Release --filter "TestCategory!=Integration"
     - name: Publish
       run: dotnet publish --configuration Release --framework net6.0 --output ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}
     - name: ZIP published api
