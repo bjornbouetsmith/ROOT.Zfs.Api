@@ -1,5 +1,6 @@
 # Introduction 
 A .NET Core based REST API that exposes access to ZFS.
+
 [![.NET CI Build](https://github.com/bjornbouetsmith/ROOT.Zfs.Api/actions/workflows/dotnet-ci-build.yml/badge.svg)](https://github.com/bjornbouetsmith/ROOT.Zfs.Api/actions/workflows/dotnet-ci-build.yml)
 
 # Getting Started
@@ -13,6 +14,8 @@ Installation is manual for now - but there is a deploy.sh file as an example for
 
 There is also a zfs-api.service unit file, that can be used if you want to run the api as a service on linux.
 
+Latest release is:
+https://github.com/bjornbouetsmith/ROOT.Zfs.Api/releases/tag/v1.0.2
 
 ## Help needed
 If you want to help make this library greater either by 
