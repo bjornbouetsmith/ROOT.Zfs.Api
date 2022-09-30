@@ -48,6 +48,8 @@ jobs:
       with:
         file: Source/Api/Api.csproj
         version: ${{ inputs.version }}
+      env:
+        release_version: ${{ inputs.version }}
     - name: Update version auto
       id: update_version override
       if: ${{ inputs.version == '' }}
@@ -55,14 +57,8 @@ jobs:
       with:
         file: Source/Api/Api.csproj
         version: build
-    - name: expose-auto-version
-      if: ${{ inputs.version == '' }}
       env:
         release_version: ${{ steps.update_version.outputs.newVersion }}
-    - name: expose-manual-version
-      if: ${{ inputs.version != '' }}
-      env:
-        release_version: ${{ inputs.version }}
     - name: Build
       run: dotnet build Source/ROOT.Zfs.Api.sln --no-restore --configuration Release
 #    - name: Test
