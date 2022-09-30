@@ -1,20 +1,30 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+A .NET Core based REST API that exposes access to ZFS.
+[![.NET CI Build](https://github.com/bjornbouetsmith/ROOT.Zfs.Api/actions/workflows/dotnet-ci-build.yml/badge.svg)](https://github.com/bjornbouetsmith/ROOT.Zfs.Api/actions/workflows/dotnet-ci-build.yml)
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+The API can run on both linux and windows - but obviously if you run on windows it will only be able to manage zfs on another host.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+This is configured in the appsettings.json - whether or not to use a remote connection or not.
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+The API itself requires dotnet 6.0 - and if you run on linux - then it expects a working PAM solution, so it can use PAM to authenicate the users calling the api.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+Installation is manual for now - but there is a deploy.sh file as an example for linux deployments.
+
+There is also a zfs-api.service unit file, that can be used if you want to run the api as a service on linux.
+
+
+## Help needed
+If you want to help make this library greater either by 
+* Contributing code 
+* Writing examples
+* Better documentation
+* Packages for linux installations or any other OS
+
+or in any other way, feel free to contact [@bjornbouetsmith](https://github.com/bjornbouetsmith).
+
+## NOTE
+
+It is still early days, but if you manage to get the API running on a server, you can access the API documentation via the url:
+
+http://server:port/swagger
