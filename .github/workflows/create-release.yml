@@ -55,7 +55,9 @@ jobs:
       uses: actions/upload-artifact@v3.1.0
       with:
         name: ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}
-        path: ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}/*.zip
+        path: |
+          ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}/*.zip
+          Source/Api/deploy.sh
         if-no-files-found: error
     - name: check in version update
       if: ${{ inputs.publish_zip }}
