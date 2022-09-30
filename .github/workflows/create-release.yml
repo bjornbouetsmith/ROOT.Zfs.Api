@@ -65,15 +65,15 @@ jobs:
 #      run: dotnet test Source/**/*.Tests.csproj --no-build --verbosity normal --configuration Release --filter "TestCategory!=Integration"
     - name: Publish
       run: |
-        dotnet publish Source/ROOT.Zfs.Api.sln --configuration Release --framework net6.0 --output ~/ROOT.Zfs.Api.v${{ release_version }}
+        dotnet publish Source/ROOT.Zfs.Api.sln --configuration Release --framework net6.0 --output ~/ROOT.Zfs.Api.v${{ env.release_version }}
         cp Source/Api/deploy.sh ~/
     - name: ZIP published api
-      run: zip -r -q ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}.zip ~/ROOT.Zfs.Api.v${{ release_version }}/
+      run: zip -r -q ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}.zip ~/ROOT.Zfs.Api.v${{ env.release_version }}/
     - name: Upload zip file
       if: ${{ inputs.publish_zip }}
       uses: actions/upload-artifact@v3.1.0
       with:
-        name: ROOT.Zfs.Api.v${{ release_version }}
+        name: ROOT.Zfs.Api.v${{ env.release_version }}
         path: |
           ~/**/*.zip
           ~/deploy.sh
@@ -84,7 +84,7 @@ jobs:
       run: |
         git config user.name "${{ github.triggering_actor }}"
         git add .
-        git commit -m "Update version to ${{ release_version }}"
+        git commit -m "Update version to ${{ env.release_version }}"
         git push -f
-        git tag "v${{ release_version }}"
+        git tag "v${{ env.release_version }}"
         git push --tags -f
