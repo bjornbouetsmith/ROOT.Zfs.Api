@@ -72,7 +72,9 @@ jobs:
         dotnet publish Source/ROOT.Zfs.Api.sln --configuration Release --framework net6.0 --output ~/ROOT.Zfs.Api.v${{ env.release_version }}
         cp Source/Api/deploy.sh ~/
     - name: ZIP published api
-      run: zip -r -q ~/ROOT.Zfs.Api.v${{ env.release_version }}.zip ~/ROOT.Zfs.Api.v${{ env.release_version }}/
+      run: |
+        cd ~/ROOT.Zfs.Api.v${{ env.release_version }}/
+        zip -r -q ~/ROOT.Zfs.Api.v${{ env.release_version }}.zip .
     - name: Upload zip file
       if: ${{ inputs.publish_zip }}
       uses: actions/upload-artifact@v3.1.0
