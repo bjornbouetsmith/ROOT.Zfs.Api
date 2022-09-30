@@ -48,9 +48,10 @@ jobs:
       with:
         file: Source/Api/Api.csproj
         version: ${{ inputs.version }}
+    - name: Expose override version
+      if: ${{ inputs.version != '' }}
       run: |
         "echo release_version=${{ inputs.version }}" >> $GITHUB_ENV
-
     - name: Update version auto
       id: update_version_auto
       if: ${{ inputs.version == '' }}
@@ -58,6 +59,8 @@ jobs:
       with:
         file: Source/Api/Api.csproj
         version: build
+    - name: Expose auto version
+      if: ${{ inputs.version == '' }}
       run: |
         "echo release_version=${{ steps.update_version.outputs.newVersion }}" >> $GITHUB_ENV
     - name: Build
