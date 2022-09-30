@@ -22,7 +22,7 @@ jobs:
         dotnet nuget add source --username ${{ github.triggering_actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/bjornbouetsmith/index.json"
         dotnet restore Source/Api.sln
     - name: Build
-      run: dotnet build Source/Api.sln --no-restore
+      run: dotnet build Source/ROOT.Zfs.Api.sln --no-restore
     - name: Test
       run: dotnet test Source/**/*.Tests.csproj --no-build --verbosity normal --filter "TestCategory!=Integration"
     - name: Set status

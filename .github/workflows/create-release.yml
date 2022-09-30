@@ -35,7 +35,7 @@ jobs:
     - name: Restore dependencies
       run: |
         dotnet nuget add source --username ${{ github.triggering_actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/bjornbouetsmith/index.json"
-        dotnet restore Source/ROOT.Zfs.sln
+        dotnet restore Source/ROOT.Zfs.Api.sln
     - name: Update version
       id: update_version
       uses: vers-one/dotnet-project-version-updater@v1.0
@@ -43,12 +43,12 @@ jobs:
         file: Source/Api/Api.csproj
         version: bump-build
     - name: Build
-      run: dotnet build Source/Api.sln --no-restore --configuration Release
+      run: dotnet build Source/ROOT.Zfs.Api.sln --no-restore --configuration Release
     - name: Test
       run: dotnet test Source/**/*.Tests.csproj --no-build --verbosity normal --configuration Release --filter "TestCategory!=Integration"
     - name: Publish
       run: dotnet publish --configuration Release --framework net6.0 --output ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}
-    - name: ZIP
+    - name: ZIP published api
       run: zip -r -q ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}.zip ~/ROOT.Zfs.Api.v${{ steps.update_version.outputs.newVersion }}/
     - name: Upload zip file
       if: ${{ inputs.publish_zip }}
