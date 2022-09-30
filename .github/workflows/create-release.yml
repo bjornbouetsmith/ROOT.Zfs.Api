@@ -51,7 +51,7 @@ jobs:
     - name: Expose override version
       if: ${{ inputs.version != '' }}
       run: |
-        echo ""release_version=${{ inputs.version }}" >> $GITHUB_ENV
+        echo "release_version=${{ inputs.version }}" >> $GITHUB_ENV
     - name: Update version auto
       id: update_version_auto
       if: ${{ inputs.version == '' }}
@@ -62,7 +62,7 @@ jobs:
     - name: Expose auto version
       if: ${{ inputs.version == '' }}
       run: |
-        echo ""release_version=${{ steps.update_version.outputs.newVersion }}" >> $GITHUB_ENV
+        echo "release_version=${{ steps.update_version.outputs.newVersion }}" >> $GITHUB_ENV
     - name: Build
       run: dotnet build Source/ROOT.Zfs.Api.sln --no-restore --configuration Release
 #    - name: Test
