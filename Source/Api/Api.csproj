@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <Version>1.0.1.0</Version>
+    <Version>1</Version>
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>1b94c50a-02c2-443a-82b2-9e0443a56993</UserSecretsId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
