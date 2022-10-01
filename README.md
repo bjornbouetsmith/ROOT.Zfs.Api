@@ -23,6 +23,7 @@ If you want to help make this library greater either by
 * Writing examples
 * Better documentation
 * Packages for linux installations or any other OS
+* Providing scripts so a deployment of a VM can happen, where the ZFS library can be tested against - this can be either Azure or EC2. (only the scripts to automate creation of the VM, create required pools etc.)
 
 or in any other way, feel free to contact [@bjornbouetsmith](https://github.com/bjornbouetsmith).
 
