@@ -57,5 +57,16 @@ namespace Api.Controllers
             
             return new Response<Property[]> { Data = properties.ToArray() };
         }
+
+        /// <summary>
+        /// Gets a list of disks
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("/api/zfs/info/disks")]
+        public Response<DiskInfo[]> GetDisks()
+        {
+            var disks = _zfs.ListDisks();
+            return new Response<DiskInfo[]> { Data = disks.ToArray() };
+        }
     }
 }
