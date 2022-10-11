@@ -41,7 +41,10 @@ namespace Api.Controllers
 
             return new Response<CommandHistory[]> { Data = history.ToArray() };
         }
-
+        /// <summary>
+        /// Gets pool information - data comes from zpool info
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("/api/zfs/pools")]
         public Response<PoolInfo[]> GetPoolInfos()
         {
@@ -66,7 +69,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Creates a zfs pool with the given name and args
+        /// Creates a zfs pool with the given arguments
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
@@ -76,6 +79,18 @@ namespace Api.Controllers
             var status = _zfs.Pool.CreatePool(args);
 
             return new Response<PoolStatus> { Data = status };
+        }
+        /// <summary>
+        /// Destroy the given pool.
+        /// Use with caution.
+        /// </summary>
+        /// <param name="pool">The name of the pool to destroy</param>
+        /// <returns></returns>
+        [HttpPost("/api/zfs/pools/{pool}")]
+        public Response DestroyPool(string pool)
+        {
+            _zfs.Pool.DestroyPool(pool);
+            return new Response();
         }
     }
 }
