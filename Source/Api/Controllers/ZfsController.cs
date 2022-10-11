@@ -4,7 +4,6 @@ using Api.Models;
 using Api.Models.Zfs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ROOT.Zfs.Core;
 using ROOT.Zfs.Public;
 using ROOT.Zfs.Public.Data;
 
