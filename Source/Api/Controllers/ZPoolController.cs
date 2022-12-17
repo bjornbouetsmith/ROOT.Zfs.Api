@@ -5,6 +5,7 @@ using Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Arguments.Pool;
 using ROOT.Zfs.Public.Data;
 using ROOT.Zfs.Public.Data.Pools;
 
@@ -15,7 +16,7 @@ namespace Api.Controllers
     /// </summary>
     [Authorize]
     [ApiController]
-    public class ZPoolController : ControllerBase
+    public class ZPoolController : ApiControllerBase
     {
         private readonly IZfs _zfs;
 
@@ -37,7 +38,13 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/pools/{pool}/history")]
         public Response<CommandHistory[]> GetCommandHistory(string pool, [FromQuery] int skipLines = 0, [FromQuery] DateTime greaterThan = default)
         {
-            var history = _zfs.Pool.GetHistory(pool, skipLines);
+            var args = new PoolHistoryArgs { PoolName = pool, SkipLines = skipLines, AfterDate = greaterThan };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<CommandHistory[]>(errors);
+            }
+
+            var history = _zfs.Pool.History(args);
 
             return new Response<CommandHistory[]> { Data = history.ToArray() };
         }
@@ -48,7 +55,7 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/pools")]
         public Response<PoolInfo[]> GetPoolInfos()
         {
-            var infos = _zfs.Pool.GetAllPoolInfos();
+            var infos = _zfs.Pool.List();
 
             return new Response<PoolInfo[]> { Data = infos?.ToArray() };
         }
@@ -56,7 +63,13 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/pools/{pool}/info")]
         public Response<PoolInfo> GetPoolInfo(string pool)
         {
-            var info = _zfs.Pool.GetPoolInfo(pool);
+            var args = new PoolListArgs { PoolName = pool };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<PoolInfo>(errors);
+            }
+
+            var info = _zfs.Pool.List(args);
 
             return new Response<PoolInfo> { Data = info };
         }
@@ -64,7 +77,12 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/pools/{pool}/status")]
         public Response<PoolStatus> GetPoolStatus(string pool)
         {
-            var status = _zfs.Pool.GetStatus(pool);
+            var args = new PoolStatusArgs { PoolName = pool };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<PoolStatus>(errors);
+            }
+            var status = _zfs.Pool.Status(args);;
             return new Response<PoolStatus> { Data = status };
         }
 
@@ -74,9 +92,14 @@ namespace Api.Controllers
         /// <param name="args"></param>
         /// <returns></returns>
         [HttpPost("/api/zfs/pools")]
-        public Response<PoolStatus> CreatePool([FromBody]PoolCreationArgs args)
+        public Response<PoolStatus> CreatePool([FromBody]PoolCreateArgs args)
         {
-            var status = _zfs.Pool.CreatePool(args);
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<PoolStatus>(errors);
+            }
+
+            var status = _zfs.Pool.Create(args);
 
             return new Response<PoolStatus> { Data = status };
         }
@@ -86,10 +109,15 @@ namespace Api.Controllers
         /// </summary>
         /// <param name="pool">The name of the pool to destroy</param>
         /// <returns></returns>
-        [HttpPost("/api/zfs/pools/{pool}")]
+        [HttpDelete("/api/zfs/pools/{pool}")]
         public Response DestroyPool(string pool)
         {
-            _zfs.Pool.DestroyPool(pool);
+            var args = new PoolDestroyArgs { PoolName = pool };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<Response>(errors);
+            }
+            _zfs.Pool.Destroy(args);
             return new Response();
         }
     }

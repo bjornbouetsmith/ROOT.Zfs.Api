@@ -7,15 +7,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Shared.Utils.OS;
 using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Arguments.Dataset;
 using ROOT.Zfs.Public.Data;
-using ROOT.Zfs.Public.Data.DataSets;
+using ROOT.Zfs.Public.Data.Datasets;
 
 namespace Api.Controllers
 {
     [Authorize]
     [Route("api/zfs/datasets")]
     [ApiController]
-    public class DataSetController : ControllerBase
+    public class DataSetController : ApiControllerBase
     {
         private readonly IZfs _zfs;
 
@@ -30,10 +31,10 @@ namespace Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public Response<IEnumerable<DataSet>> GetDataSets()
+        public Response<IEnumerable<Dataset>> GetDataSets()
         {
-            var dataSets = _zfs.DataSets.GetDataSets();
-            return new Response<IEnumerable<DataSet>> { Data = dataSets };
+            var dataSets = _zfs.Datasets.List(new DatasetListArgs());
+            return new Response<IEnumerable<Dataset>> { Data = dataSets };
         }
 
         /// <summary>
@@ -42,11 +43,17 @@ namespace Api.Controllers
         /// <param name="name">The dataset to delete</param>
         /// <param name="flags">How to delete the dataset</param>
         [HttpDelete("/api/zfs/datasets/{name}")]
-        public Response<string[]> DeleteDataSet(string name, [FromQuery] DataSetDestroyFlags flags)
+        public Response<string[]> DeleteDataSet(string name, [FromQuery] DatasetDestroyFlags flags)
         {
-            var response = _zfs.DataSets.DestroyDataSet(name, flags);
+            var args = new DatasetDestroyArgs { Dataset = name, DestroyFlags = flags };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<string[]>(errors);
+            }
 
-            var data = flags.HasFlag(DataSetDestroyFlags.DryRun) ? response.DryRun : null;
+            var response = _zfs.Datasets.Destroy(args);
+
+            var data = flags.HasFlag(DatasetDestroyFlags.DryRun) ? response.DryRun : null;
 
             return new Response<string[]> { Data = data?.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) };
         }
@@ -59,20 +66,27 @@ namespace Api.Controllers
         /// [pool]/[preceedingdataset]/[dataset]</param>
         /// <param name="properties">Any properties that should be set when creating the dataset. This is not required and an empty array can be sent</param>
         [HttpPost("/api/zfs/datasets/{name}")]
-        public Response<DataSet> CreateDataSet(string name, [FromBody] PropertyData[] properties)
+        public Response<Dataset> CreateDataSet(string name, [FromBody] PropertyData[] properties)
         {
-            // TODO: validate incoming properties for name/value - if not zfs will throw exception
-            var propertyValues = properties.Select(p => new PropertyValue(p.Name, p.Source, p.Value)).ToArray();
+            var propertyValues = properties.Select(p => new PropertyValue { Property = p.Name, Source = p.Source, Value = p.Value }).ToArray();
+
+            var args = new DatasetCreationArgs { DatasetName = name, Properties = propertyValues, Type = DatasetTypes.Filesystem };
+
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<Dataset>(errors);
+            }
+
             try
             {
-                var dataset = _zfs.DataSets.CreateDataSet(name, propertyValues);
+                var dataset = _zfs.Datasets.Create(args);
 
-                return new Response<DataSet> { Data = dataset };
+                return new Response<Dataset> { Data = dataset };
             }
             catch (ProcessCallException e)
             {
                 Response.StatusCode = 500;
-                return new Response<DataSet> { Status = ResponseStatus.Failure, ErrorText = e.ToString() };
+                return new Response<Dataset> { Status = ResponseStatus.Failure, ErrorText = e.ToString() };
             }
 
         }
@@ -82,9 +96,15 @@ namespace Api.Controllers
         /// </summary>
         /// <param name="name">The name of the dataset</param>
         [HttpGet("/api/zfs/datasets/{name}")]
-        public Response<DataSet> GetDataSet(string name)
+        public Response<Dataset> GetDataSet(string name)
         {
-            var dataset = _zfs.DataSets.GetDataSet(name);
+            var args = new DatasetListArgs { Root = name };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<Dataset>(errors);
+            }
+
+            var dataset = _zfs.Datasets.List(args);
 
             if (dataset == null)
             {
@@ -92,7 +112,7 @@ namespace Api.Controllers
                 return null;
             }
 
-            return new Response<DataSet> { Data = dataset };
+            return new Response<Dataset> { Data = dataset.FirstOrDefault() };
         }
     }
 }

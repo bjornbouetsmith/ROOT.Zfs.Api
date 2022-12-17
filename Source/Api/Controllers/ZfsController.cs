@@ -5,6 +5,7 @@ using Api.Models.Zfs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Arguments;
 using ROOT.Zfs.Public.Data;
 
 namespace Api.Controllers
@@ -40,7 +41,7 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/info/datasets/properties")]
         public Response<Property[]> GetAvailableDataSetProperties()
         {
-            var properties = _zfs.Properties.GetAvailableDataSetProperties();
+            var properties = _zfs.Properties.GetAvailable(PropertyTarget.Dataset);
             
             return new Response<Property[]> { Data = properties.ToArray() };
         }
@@ -52,8 +53,8 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/info/pools/properties")]
         public Response<Property[]> GetAvailablePoolProperties()
         {
-            var properties = _zfs.Properties.GetAvailableDataSetProperties();
-            
+            var properties = _zfs.Properties.GetAvailable(PropertyTarget.Pool);
+
             return new Response<Property[]> { Data = properties.ToArray() };
         }
 

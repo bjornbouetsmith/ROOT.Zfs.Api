@@ -10,6 +10,7 @@ namespace Api.Models
 
         public static PropertyData FromValue(PropertyValue value)
         {
+            if(value == null) return null;
             return new PropertyData { Name = value.Property, Value = value.Value, Source = value.Source };
         }
     }

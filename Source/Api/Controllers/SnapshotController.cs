@@ -4,15 +4,15 @@ using Api.Core;
 using Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ROOT.Shared.Utils.OS;
 using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Arguments.Snapshots;
 using ROOT.Zfs.Public.Data;
 
 namespace Api.Controllers
 {
     [Authorize]
     [ApiController]
-    public class SnapshotController : ControllerBase
+    public class SnapshotController : ApiControllerBase
     {
         private readonly IZfs _zfs;
 
@@ -25,10 +25,16 @@ namespace Api.Controllers
         /// Gets a list of snapshots in the given dataset
         /// </summary>
         /// <param name="dataset">The dataset to return snapshots for</param>
+        /// <param name="includeChildren">Whether or not to also return child datasets for the given root dataset - defaults to true</param>
         [HttpGet("/api/zfs/datasets/{dataset}/snapshots")]
-        public Response<Snapshot[]> GetSnapshots(string dataset)
+        public Response<Snapshot[]> GetSnapshots(string dataset, [FromQuery] bool includeChildren = true)
         {
-            var snapshots = _zfs.Snapshots.GetSnapshots(dataset);
+            var args = new SnapshotListArgs { Root = dataset, IncludeChildren = includeChildren };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<Snapshot[]>(errors);
+            }
+            var snapshots = _zfs.Snapshots.List(args);
 
             return new Response<Snapshot[]> { Data = snapshots.ToArray() };
         }
@@ -41,9 +47,14 @@ namespace Api.Controllers
         /// <param name="isExactName">Whether or not the snapshot name is to be used for exact match, or as a prefix.
         /// Optional to pass this, defaults to true, which means exact match on snapshot name</param>
         [HttpDelete("/api/zfs/datasets/{dataset}/snapshots/{snapshot}")]
-        public Response DeleteSnapshot(string dataset, string snapshot, [FromQuery]bool isExactName = true)
+        public Response DeleteSnapshot(string dataset, string snapshot, [FromQuery] bool isExactName = true)
         {
-            _zfs.Snapshots.DestroySnapshot(dataset, snapshot, isExactName);
+            var args = new SnapshotDestroyArgs { Dataset = dataset, Snapshot = snapshot, IsExactName = isExactName };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse(errors);
+            }
+            _zfs.Snapshots.Destroy(args);
 
             return new Response();
         }
@@ -56,11 +67,13 @@ namespace Api.Controllers
         [HttpPost("/api/zfs/datasets/{dataset}/snapshots")]
         public Response CreateSnapshot(string dataset, [FromBody] string snapshot)
         {
-            // Trim values before @ if there, so we only pass on the raw name to zfs
-            var atIndex = snapshot.IndexOf("@", StringComparison.InvariantCultureIgnoreCase);
-            var rawSnapshot = atIndex > -1 ? snapshot.Substring(atIndex + 1) : snapshot;
+            var args = new SnapshotCreateArgs{ Dataset = dataset, Snapshot = snapshot };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse(errors);
+            }
 
-            _zfs.Snapshots.CreateSnapshot(dataset, rawSnapshot);
+            _zfs.Snapshots.Create(args);
 
             return new Response();
         }

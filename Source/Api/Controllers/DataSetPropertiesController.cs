@@ -6,16 +6,24 @@ using Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ROOT.Zfs.Public;
+using ROOT.Zfs.Public.Arguments;
+using ROOT.Zfs.Public.Arguments.Properties;
 using ROOT.Zfs.Public.Data;
 
 namespace Api.Controllers
 {
+    /// <summary>
+    /// Contains functionality for properties related to datasets
+    /// </summary>
     [Authorize]
     [ApiController]
-    public class DataSetPropertiesController : ControllerBase
+    public class DataSetPropertiesController : ApiControllerBase
     {
         private readonly IZfs _zfs;
 
+        /// <summary>
+        /// Constructs the controller with the given zfsAccessor
+        /// </summary>
         public DataSetPropertiesController(IZfsAccessor zfsAccessor)
         {
             _zfs = zfsAccessor.Zfs;
@@ -28,7 +36,13 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{dataset}/properties")]
         public Response<PropertyData[]> GetProperties(string dataset)
         {
-            var props = _zfs.Properties.GetProperties(dataset);
+            var args = new GetPropertyArgs { Target = dataset, PropertyTarget = PropertyTarget.Dataset };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<PropertyData[]>(errors);
+            }
+
+            var props = _zfs.Properties.Get(args);
             return new Response<PropertyData[]> { Data = props.Select(PropertyData.FromValue).ToArray() };
         }
 
@@ -41,7 +55,12 @@ namespace Api.Controllers
         [HttpGet("/api/zfs/datasets/{dataset}/properties/{property}")]
         public Response<PropertyData> GetProperty(string dataset, string property)
         {
-            var value = _zfs.Properties.GetProperty(dataset, property);
+            var args = new GetPropertyArgs { Target = dataset, PropertyTarget = PropertyTarget.Dataset, Property = property };
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<PropertyData>(errors);
+            }
+            var value = _zfs.Properties.Get(args).FirstOrDefault();
             return new Response<PropertyData> { Data = PropertyData.FromValue(value) };
         }
 
@@ -56,8 +75,13 @@ namespace Api.Controllers
         {
             try
             {
-                var newValue = _zfs.Properties.SetProperty(dataset, property, value);
-                //Zfs.
+                var args = new SetPropertyArgs { Property = property, Value = value, Target = dataset, PropertyTarget = PropertyTarget.Dataset };
+                if (!args.Validate(out var errors))
+                {
+                    return ToErrorResponse<PropertyData>(errors);
+                }
+
+                var newValue = _zfs.Properties.Set(args);
                 return new Response<PropertyData> { Data = PropertyData.FromValue(newValue) };
             }
             catch (Exception e)
@@ -77,9 +101,21 @@ namespace Api.Controllers
         {
             try
             {
-                _zfs.Properties.ResetPropertyToInherited(dataset, property);
+                var args = new InheritPropertyArgs { Target = dataset, Property = property, PropertyTarget = PropertyTarget.Dataset };
+                if (!args.Validate(out var errors))
+                {
+                    return ToErrorResponse<PropertyData>(errors);
+                }
 
-                var value = _zfs.Properties.GetProperty(dataset, property);
+                _zfs.Properties.Reset(args);
+
+                var getArgs = new GetPropertyArgs { Target = dataset, PropertyTarget = PropertyTarget.Dataset, Property = property };
+                if (!getArgs.Validate(out errors))
+                {
+                    return ToErrorResponse<PropertyData>(errors);
+                }
+
+                var value = _zfs.Properties.Get(getArgs).FirstOrDefault();
                 return new Response<PropertyData> { Data = PropertyData.FromValue(value) };
             }
             catch (Exception e)
@@ -100,7 +136,7 @@ namespace Api.Controllers
         {
             try
             {
-                if (properties?.Length == 0)
+                if ((properties?.Length ?? 0) == 0)
                 {
                     Response.StatusCode = 400;
                     return new Response<PropertyValue[]> { Status = ResponseStatus.Failure, ErrorText = "Please provide at least one property to set" };
@@ -109,7 +145,12 @@ namespace Api.Controllers
                 List<PropertyValue> responses = new List<PropertyValue>();
                 foreach (var property in properties)
                 {
-                    var newValue = _zfs.Properties.SetProperty(dataset, property.Name, property.Value);
+                    var args = new SetPropertyArgs { Property = property.Name, Value = property.Value, Target = dataset, PropertyTarget = PropertyTarget.Dataset };
+                    if (!args.Validate(out var errors))
+                    {
+                        return ToErrorResponse<PropertyValue[]>(errors);
+                    }
+                    var newValue = _zfs.Properties.Set(args);
                     responses.Add(newValue);
                 }
 
