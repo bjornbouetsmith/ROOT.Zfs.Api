@@ -11,10 +11,7 @@ using ROOT.Zfs.Public.Data;
 namespace Api.Controllers
 {
     [Route("api/zfs")]
-    [Authorize]
-    //[Route("[controller]")]
-    [ApiController]
-    public class ZfsController : ControllerBase
+    public class ZfsController : ApiControllerBase
     {
         private readonly IZfs _zfs;
 

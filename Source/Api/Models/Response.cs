@@ -12,6 +12,14 @@
 
     public class Response<TWhat> : Response
     {
+        public Response()
+        {
+        }
+
+        public Response(TWhat data)
+        {
+            Data = data;
+        }
         public TWhat Data { get; set; }
     }
 
