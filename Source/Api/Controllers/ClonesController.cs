@@ -39,6 +39,11 @@ namespace Api.Controllers
             {
                 DatasetTypes = DatasetTypes.Filesystem | DatasetTypes.Volume
             };
+
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse<IEnumerable<Dataset>>(errors);
+            }
             var datasets = _zfs.Datasets.List(args);
             var clones = datasets.Where(d => d.IsClone);
             return new Response<IEnumerable<Dataset>> { Data = clones };
@@ -53,6 +58,12 @@ namespace Api.Controllers
                 var properties = request.Properties.Select(p => new PropertyValue { Property = p.Name, Value = p.Value }).ToList();
                 args.Properties = properties;
             }
+
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse(errors);
+            }
+
             _zfs.Snapshots.Clone(args);
             return new Response();
         }
@@ -67,6 +78,12 @@ namespace Api.Controllers
         public Response PromoteClone(string name)
         {
             var args = new PromoteArgs { Name = name };
+
+            if (!args.Validate(out var errors))
+            {
+                return ToErrorResponse(errors);
+            }
+
             _zfs.Datasets.Promote(args);
             return new Response();
         }
