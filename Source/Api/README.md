@@ -1,5 +1,5 @@
 ﻿
-**Prequisites**
+# Prequisites
 
 Requires ZFS installed on the server
 
@@ -37,3 +37,21 @@ cd /mnt/zfsapi/zfsapi
 tr -d '\r' < /mnt/zfsapi/zfsapi/1.2.3/deploy.sh > /mnt/zfsapi/zfsapi/deploy.sh
 
 sudo sh /mnt/zfsapi/zfsapi/deploy.sh 1.2.3 all
+
+# Docker
+
+You can also run the api in a docker container
+
+
+Simply open a shell/powershell/cmd whatever up on the Source folder and run the following command to build the image
+
+```bash
+docker build -t zfs-api:1.1.10 -f './Dockerfile'
+```
+
+Where you change the version tag to whatever version you want.
+
+## TODO
+* ssh keys needs to be installed in the docker environment
+Can most likely just be done by creating a filesystem that copies your wanted .ssh folder to /root/.ssh in the container
+* Username/password auth

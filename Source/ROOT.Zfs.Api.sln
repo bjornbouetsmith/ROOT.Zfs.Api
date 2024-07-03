@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{BEDD26
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4912DE71-350A-4036-B203-CC7A1CFD3513}"
 	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		Dockerfile = Dockerfile
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
